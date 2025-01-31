@@ -38,3 +38,16 @@ Where microsystems show their strengths over Erlang is on the deployment ecosyst
 
 ### What is the difference between Elixir and Erlang?
 
+Elixir has language features that minimize some of the code noise and ceremony that happens in Erlang. A quick example is generating a simple genserver.
+
+A major difference between them is that Elixir implements macros. Macros is code that runs at compile time (not like c-style macros). This lets Elixir be built on-top of Erlang and written in mostly Elixir. Macros are super powerful and extensible letting you have more flexible and less ceremonious code.
+
+Elixir emphasizes the use of the |> operator to compose functions.
+
+### When should you consider something else?
+
+Since Elixir runs on a VM (BEAM) it is not necessarily the fastest to start up or in raw performance. Good performance comes from the concurrency model, fault-tolerance and scalability. If the system that is being designed does not need to be running the entire time and it requires really really fast performance sparingly (not something that stays on all the time, but something that requires a fast startup time), then you should look at something else.
+
+"the goal is not to serve the most request per second, it is to reliably serve requests"
+
+Another limitation is the CPU limitations, if the system has a lot of CPU intensive tasks then it is better to go with something else.
