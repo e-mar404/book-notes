@@ -112,3 +112,70 @@ instead we use good old recursion. Usually on production we tend to use
 recursion sparingly since there are various abstractions set in place to do
 more elegant and one liner solutions.
 
+*Iterating with recursion*
+
+When wanting to implement a function that prints all natural numbers we can make
+a function that calls (n-1) and then prints (n) the way that the recursive stack
+gets called will make it look like it starts at 1..n.
+
+Exercise. Extend this to make it work for negative numbers
+
+```elixir
+defmodule NaturalNums do 
+    def print(1), do: IO.puts(1)
+
+    def print(n) do
+        print(n-1)
+        IO.puts(n)
+    end
+end
+```
+
+Extended function: adding these multi clause functions will add the ability to
+print the negative natural numbers from 0..n 
+
+```elixir
+def print(0), do: IO.puts(0)
+
+def print(n) when n < 0 do
+    print(n+1)
+    IO.puts(n)
+end
+```
+
+In order to successfully iterate with recursion you first set your goal state
+with multi clause functions and then the body of the other functions will be the
+general work that needs to be done to reach the end/goal state.
+ 
+### Tail Call Optimization (TCO)
+
+Usually doing recursive calls like this will add functions to the call stack and
+at some point there will be a stack overflow and the program will crash. To
+remedy that Erlang can handle optimization in a very special case to where if
+the last thing a functions executes is a call to another function then it will
+act like a goto/jump statement and will not take more space in memory.
+
+Because tail recursion does not consume additional memory, it is an appropriate
+solution for arbitrarily large iterations.
+
+You can also think of tco as a direct equivalent of a classical loop in
+imperative language.
+
+Even with this said tco is not always the answer, rule of thumb is that if the
+loop needs to run for a long time (big recursive stack) then go with tco if not
+then just whatever is more readable and easier to grasp.
+
+*Practive tco*
+
+Implement the following: first non-tail recursive then tail recursive
+
+- list_len/1 return the length of the list
+- range/2 take two integers from and to and returns a list of all integer
+  numbers in the given range
+- positive/1 take a list and returns another list that contains only the
+  positive numbers form the input list
+
+
+
+
+
