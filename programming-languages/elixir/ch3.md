@@ -165,7 +165,7 @@ Even with this said tco is not always the answer, rule of thumb is that if the
 loop needs to run for a long time (big recursive stack) then go with tco if not
 then just whatever is more readable and easier to grasp.
 
-*Practive tco*
+*Practice tco*
 
 Implement the following: first non-tail recursive then tail recursive
 
@@ -174,6 +174,23 @@ Implement the following: first non-tail recursive then tail recursive
   numbers in the given range
 - positive/1 take a list and returns another list that contains only the
   positive numbers form the input list
+
+### Higher order functions
+
+A higher order function is a type of function that take s one or more functions
+as input or returns one or more functions (or both).
+
+For now you just need to know that Enums are a type of data that implement a
+specific Enumarable contract. Some examples are ranges, lists, maps, and MapSet.
+
+Good tip when writing unctions for Enum functions is to use the capture
+operator & for simplified lambda functions.
+
+The most versatile function might be reduce since you would make the main higher
+order functions from functional languages with reduce (map, filter, reduce).
+
+As a tip from the book, avoid writing complex lambdas, that is probably a sign
+to take the lambda out and make it its own function.
 
 
 
