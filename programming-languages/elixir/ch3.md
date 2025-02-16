@@ -192,7 +192,30 @@ order functions from functional languages with reduce (map, filter, reduce).
 As a tip from the book, avoid writing complex lambdas, that is probably a sign
 to take the lambda out and make it its own function.
 
+### Comprehensions
 
+The comprehension iterates through each element and runs the do..end block
+returning the result of running that block.
+
+Comprehensions can return anything that is a collectible. A collectible is an
+abstract term for a functional data type that can collect values, like a list,
+map, MapSet or file steream.
+
+To return something in specific and explicitly assign the collectible use the
+into: option.
+
+### Streams
+
+Streams are a way of mapping through an enumerable in a lazy way.
+
+Usually you get the same result as just using Enum functions but if you only use
+stream operations (lazy) then there will only be one iteration of the enumerable
+which saves a lot of computation when dealing with long transformations of big
+data.
+
+A really good use case of streams is when reading a file line by line. Instead
+of loading the entire file in memory you can lazily evaluate one line at a time
+and save a lot of memory usage.
 
 
 
