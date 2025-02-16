@@ -1,5 +1,5 @@
 # practice 3.4 pg 99
-# a range/2 functions that takes two integers from and to and returns a list of all integer numbers in the given range
+# a range/2 function that takes two integers from and to and returns a list of all integer numbers in the given range
 defmodule ListHelper do
   def range_rec(from, to) when from == to do
     [to]

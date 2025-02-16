@@ -1,5 +1,5 @@
 # practice 3.4 pg 99
-# a positive/1 functions that calculates the length of a list
+# a positive/1 function that takes a list and returns another list that contains only the positive numbers from the input list
 defmodule ListHelper do
   def positive_rec([hd | tl]) do
     case hd >= 0 do

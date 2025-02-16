@@ -1,5 +1,5 @@
 # practice 3.4 pg 99
-# a list_len/1 functions that calculates the length of a list
+# a list_len/1 function that calculates the length of a list
 defmodule ListHelper do
   def list_len_rec([_ | tl]) do
     1 + list_len_rec(tl)     
