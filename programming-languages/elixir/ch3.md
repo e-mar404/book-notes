@@ -217,5 +217,21 @@ A really good use case of streams is when reading a file line by line. Instead
 of loading the entire file in memory you can lazily evaluate one line at a time
 and save a lot of memory usage.
 
+### Infinite streams
 
+With previous functions we need an existing enumerable collection to iterate
+through, but there is a way to create your own from scratch, giving you the
+ability to make infinite streams (possible because of lazy evaluation)
+
+*Practice streams*
+
+Using large_lines!/1 as a model, write the following functions:
+
+- A `lines_length!/1` that takes a file path and returns a list of numbers, with
+  each number representing the length of the corresponding line from the file.
+- A `longer_line_length!/1` that returns the length of the longest line in a file.
+- A `longest_line!/1` that returns the contents of the longest line in a file.
+- A `words_per_line!/1` that returns a list of numbers, with each number
+  representing the word count in a file. Hint: to find the word count of a line
+  use `length(String.split(line))`
 
