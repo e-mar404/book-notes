@@ -13,6 +13,29 @@ defmodule TodoList do
     }
   end
 
+  def update_entry(list, entry_id, updater_fn) do
+    case Map.fetch(list.entries, entry_id) do
+      :error -> 
+        list
+
+      {:ok, old_entry} ->
+        new_entry = updater_fn.(old_entry)
+        new_entries = Map.put(list.entries, new_entry.id, new_entry)
+        %TodoList{list | entries: new_entries}
+    end
+  end
+
+  def delete_entry(list, entry_id) do
+    case Map.fetch(list.entries, entry_id) do
+      :error ->
+        list
+
+      {:ok, _} ->
+        new_entries = Map.delete(list.entries, entry_id)  
+        %TodoList{list | entries: new_entries}
+    end 
+  end
+
   def entries(list, date) do
     list.entries
     |> Map.values()
@@ -20,10 +43,28 @@ defmodule TodoList do
   end
 end
 
-# expect [%{id: 1, date: ~D[2023-12-19], task: "Movies"}, %{id: 3, date: ~D[2023-12-19], task: "Dentist"}]
-TodoList.new()
+IO.puts "creating list..."
+list = TodoList.new()
 |> TodoList.add_entry(%{date: ~D[2023-12-19], task: "Dentist"})
 |> TodoList.add_entry(%{date: ~D[2023-12-20], task: "Shopping"})
 |> TodoList.add_entry(%{date: ~D[2023-12-19], task: "Movies"})
+
+# expect [%{id: 1, date: ~D[2023-12-19], task: "Movies"}, %{id: 3, date: ~D[2023-12-19], task: "Dentist"}]
+IO.puts "getting entries for day 2023-12-19"
+list
+|> TodoList.entries(~D[2023-12-19])
+|> IO.inspect()
+
+# expect [%{id: 2, date: ~D[2023-12-20], task: "Dinner"]} 
+IO.puts "updating entry with id 2"
+list
+|> TodoList.update_entry(2, &(Map.put(&1, :task, "Dinner")))
+|> TodoList.entries(~D[2023-12-20])
+|> IO.inspect()
+
+# expect [%{id: 3, date: ~D[2023-12-19], task: "Dentist"}]
+IO.puts "deleting entry with id 1"
+list
+|> TodoList.delete_entry(1)
 |> TodoList.entries(~D[2023-12-19])
 |> IO.inspect()
