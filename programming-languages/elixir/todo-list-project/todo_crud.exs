@@ -1,7 +1,9 @@
 defmodule TodoList do
   defstruct next_id: 1, entries: %{} 
 
-  def new(), do: %TodoList{} 
+  def new(entries \\ []) do
+    Enum.reduce(entries, %TodoList{}, &(add_entry(&2, &1)))
+  end
 
   def add_entry(list, entry) do
     new_entry = Map.put(entry, :id, list.next_id)
@@ -42,6 +44,20 @@ defmodule TodoList do
     |> Enum.filter(&(&1.date == date))
   end
 end
+
+defmodule TodoList.CSVImporter do
+  def import(file) do
+    File.stream!(file)
+    |> Stream.map(&String.split(&1, "\n", trim: true))
+    |> Stream.map(&String.split(Enum.at(&1, 0), ", "))
+    |> Enum.reduce([], &([%{date: Enum.at(&1, 0), task: Enum.at(&1, 1)} | &2]))
+    |> TodoList.new()
+  end  
+end
+
+# expect an import of 3 entries (the same ones under this snippet), they will be in reverse order but it should not matter
+TodoList.CSVImporter.import("todos.csv")
+|> IO.inspect()
 
 IO.puts "creating list..."
 list = TodoList.new()
