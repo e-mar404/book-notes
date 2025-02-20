@@ -77,3 +77,12 @@ For each abstraction you build you can override the behavior of the IO.inspect/1
 function to show whatever you may want to show. This function prints the
 inspected representation of a structure to the screen and returns the structure
 itself.
+
+### Look at new crud_todo implementation
+
+It has some important aspects on using structs and an exercise to delete a
+task.
+
+*Exercise* 
+
+Extend the todo_crud file to include a new module to import from a csv
