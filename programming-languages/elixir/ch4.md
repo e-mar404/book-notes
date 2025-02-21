@@ -86,3 +86,45 @@ task.
 *Exercise* 
 
 Extend the todo_crud file to include a new module to import from a csv
+
+### Polymorphism with protocols
+
+Polymorphism is a runtime decision about which code to execute, based on the
+nature of the input data. In elixir, the basic (but not only way) to do this is
+with protocols.
+
+So far we have seem Enum functions deal with different data types, and they have
+done different things based on the type that they are enumerating/iterating
+over.
+
+### Protocol basics
+
+A protocol is a module in which you declare functions without implementing them. 
+This will act as a contract that needs to be followed to act as the interface to
+deal with wtv thing you are trying to make.
+
+The behavior of to_string/1 is exactly the same as that of
+String.Chars.to_string/1. That is because Kernel.to_string/1 delegates to the
+String.Chars implementation.
+
+### Implementing a protocol
+
+look at todo_to_string.exs for the implementation of to_string for the module
+TodoList.
+
+Its important to notice that the protocol implementation doesn't need to be part
+of any module. This has powerful consequences. You can implement a protocol for
+a type, even if you can't modify the type's source code or you can place the
+protocol implementation anywhere in your own code, and the runtime will be able
+to take advantage of it.
+
+### Built-in protocol
+
+Some other really useful builtin protocols are:
+
+- Inspect: lets you control how your structure is printed in the debug output
+- Enumerable: lets you use Enum and Struct functions to iterate through your
+  data structure
+- Collectable: closely related to Enumerable and lets you have a structure that
+  can repeatedly add elements to
+
