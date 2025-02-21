@@ -10,8 +10,8 @@ defmodule TodoList do
     new_entries = Map.put(list.entries, list.next_id, new_entry) 
 
     %TodoList{list | 
-      entries: new_entries,
-      next_id: list.next_id + 1
+      next_id: list.next_id + 1,
+      entries: new_entries
     }
   end
 
@@ -50,22 +50,43 @@ defmodule TodoList.CSVImporter do
     File.stream!(file)
     |> Stream.map(&String.split(&1, "\n", trim: true))
     |> Stream.map(&String.split(Enum.at(&1, 0), ", "))
-    |> Enum.reduce([], &([%{date: Enum.at(&1, 0), task: Enum.at(&1, 1)} | &2]))
+    |> Stream.map(&([Date.from_iso8601!(Enum.at(&1, 0)), Enum.at(&1, 1)]))
+    |> Enum.reduce([], fn [date, task], acc -> [%{date: date, task: task} | acc] end)
     |> TodoList.new()
   end  
 end
 
 # expect an import of 3 entries (the same ones under this snippet), they will be in reverse order but it should not matter
-TodoList.CSVImporter.import("todos.csv")
+list = TodoList.CSVImporter.import("todos.csv")
+
+# expect [%{id: 1, date: ~D[2023-12-19], task: "Movies"}, %{id: 3, date: ~D[2023-12-19], task: "Dentist"}]
+IO.puts "getting entries for day 2023-12-19"
+list
+|> TodoList.entries(~D[2023-12-19])
 |> IO.inspect()
 
+# expect [%{id: 2, date: ~D[2023-12-20], task: "Dinner"]} 
+IO.puts "updating entry with id 2"
+list
+|> TodoList.update_entry(2, &(Map.put(&1, :task, "Dinner")))
+|> TodoList.entries(~D[2023-12-20])
+|> IO.inspect()
+
+# expect [%{id: 3, date: ~D[2023-12-19], task: "Movies"}]
+IO.puts "deleting entry with id 1"
+list
+|> TodoList.delete_entry(1)
+|> TodoList.entries(~D[2023-12-19])
+|> IO.inspect()
+
+# ---
 IO.puts "creating list..."
 list = TodoList.new()
 |> TodoList.add_entry(%{date: ~D[2023-12-19], task: "Dentist"})
 |> TodoList.add_entry(%{date: ~D[2023-12-20], task: "Shopping"})
 |> TodoList.add_entry(%{date: ~D[2023-12-19], task: "Movies"})
 
-# expect [%{id: 1, date: ~D[2023-12-19], task: "Movies"}, %{id: 3, date: ~D[2023-12-19], task: "Dentist"}]
+# expect [%{id: 1, date: ~D[2023-12-19], task: "Dentist"}, %{id: 3, date: ~D[2023-12-19], task: "Movies"}]
 IO.puts "getting entries for day 2023-12-19"
 list
 |> TodoList.entries(~D[2023-12-19])
