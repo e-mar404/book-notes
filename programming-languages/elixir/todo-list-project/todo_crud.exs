@@ -52,14 +52,15 @@ defmodule TodoList.CSVImporter do
     |> Stream.map(&String.split(Enum.at(&1, 0), ", "))
     |> Stream.map(&([Date.from_iso8601!(Enum.at(&1, 0)), Enum.at(&1, 1)]))
     |> Enum.reduce([], fn [date, task], acc -> [%{date: date, task: task} | acc] end)
+    |> Enum.reverse()
     |> TodoList.new()
   end  
 end
 
-# expect an import of 3 entries (the same ones under this snippet), they will be in reverse order but it should not matter
+# expect an import of 3 entries (the same ones under this snippet)
 list = TodoList.CSVImporter.import("todos.csv")
 
-# expect [%{id: 1, date: ~D[2023-12-19], task: "Movies"}, %{id: 3, date: ~D[2023-12-19], task: "Dentist"}]
+# expect [%{id: 1, date: ~D[2023-12-19], task: "Dentist"}, %{id: 3, date: ~D[2023-12-19], task: "Movies"}]
 IO.puts "getting entries for day 2023-12-19"
 list
 |> TodoList.entries(~D[2023-12-19])
@@ -72,7 +73,7 @@ list
 |> TodoList.entries(~D[2023-12-20])
 |> IO.inspect()
 
-# expect [%{id: 3, date: ~D[2023-12-19], task: "Movies"}]
+# expect [%{id: 3, date: ~D[2023-12-19], task: "Dentist"}]
 IO.puts "deleting entry with id 1"
 list
 |> TodoList.delete_entry(1)
