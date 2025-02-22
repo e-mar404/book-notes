@@ -178,4 +178,33 @@ turning into a huge switch/case-like expression.
 
 You can refactor this to rely with pattern matching instead and move message
 handling to different functions.
+ 
+## Complex state
+
+As the state becomes more complex, the code of the server process can become
+increasingly complicated. Its worth extracting the sate manipulation to a
+separate module and keeping the server process focused only on passing messages
+and keeping the state.
+
+### Concurrent vs Functional approach
+
+A process that maintains mutable state can be regarded at a kind of mutable data
+structure. You shouldn't abuse processes to avoid using the functional approach
+of transforming immutable data. PLEASE DO NOT IMPLEMENT useState IN ELIXIR!!
+
+A stateful process serves as a container of a functional immutable data
+structure. The process keeps the state alive and allows other process in the
+system to interact with this data via the exposed API.
+
+### Registered process
+
+For a process to cooperate with other processes you need the pid of the process,
+in order to not have to pass around the pid we can also register a process with
+a name.
+
+The following are the constraints that apply to registered names:
+
+- the name can only be an atom
+- a single process can have only one name
+- two processes can't have the same name
 
