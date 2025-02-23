@@ -208,3 +208,67 @@ The following are the constraints that apply to registered names:
 - a single process can have only one name
 - two processes can't have the same name
 
+## Runtime considerations
+
+### A process is sequential
+
+This is something very important, a single process is a sequential program, it
+runs expressions in a sequence one by one. If many processes send messages to a
+single process, that single process may become a bottleneck, which significantly
+affect overall throughput of the system.
+
+Most times once you identify a bottleneck, you should try to optimize the
+process internally. First try to see if the process can be achieved faster, and
+if it can't then try to split the server into multiple processes, effectively
+parallelizing the original work and hoping that doing so will boost performance
+on a multicore system.
+
+### Unlimited process mailboxes
+
+Theoretically, a process mailbox has an unlimited size, but in practice it is
+bound by the available memory.
+
+When a message does not match a pattern matching clause in a receive block then
+it goes back into the mailbox and if the mailbox size keeps growing then at some
+point performance deteriorates and may potentially crash the application. An
+overgrown mailbox puts a lot of pressure on the garbage collector and may even
+affect the performance of pattern matching in the receive block.
+
+To remedy this it is important to introduce a match-all receive clause that
+deals with unexpected messages.
+
+If you are needing to analyze something more in depth at runtime then it is
+worth noting that the BEAM gives you tools to analyze processes at runtime (i.e
+you can query each process for its mailbox and size).
+
+### Shared-nothing concurrency
+
+To honor immutability data is deep copied whenever it is passed to another
+process (have that be a spawn function call or a send function call, data is
+still passing to another process so it will result in deep copy). This usually
+does not pose a threat to performance since it is an in-memory operation making
+it relatively fast and will only degrade performance if there are multiple
+processes sending very large amount of data between each other. 
+
+There are a couple of special cases where data is passed as reference such as: 
+
+- binaries larger than 64 bytes (includes strings)
+- hard coded constants (literals)
+- terms created via the :persistent_term API
+
+Because each process is isolated then garbage collection can happen at a process
+level, making it possible to run small, fast, concurrent and distributed
+collections instead of a single blocking process of gc.
+
+### Scheduler inner workings
+
+Since the BEAM will use as many schedulers as there are cpu cores then it is
+important to notice that you can take away cpu cores from other system
+computations and services. If you are in a machine that has other processes
+running other than the BEAM then you should consider lowering the number of
+schedulers the BEAM can utilize.
+
+If a process is doing a network IO or waiting for a message, it yields the
+execution to the scheduler . The same thing happens when Process.sleep is
+invoked. As a result, you don't have to care about the nature of the work
+performed in a process.
