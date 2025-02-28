@@ -1,8 +1,8 @@
 defmodule Todo.Server do
   use GenServer
 
-  def start(list_name \\ nil) do
-    GenServer.start(__MODULE__, list_name)
+  def start_link(list_name \\ nil) do
+    GenServer.start_link(__MODULE__, list_name)
   end
 
   def add_entry(todo_pid, new_entry) do

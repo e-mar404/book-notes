@@ -2,7 +2,7 @@ defmodule Todo.CacheTest do
   use ExUnit.Case
 
   test "server_process" do
-    {:ok, cache} = Todo.Cache.start()
+    {:ok, cache} = Todo.Cache.start_link()
     bob_pid = Todo.Cache.server_process(cache, "bob")
 
     assert bob_pid != Todo.Cache.server_process(cache, "alice")
@@ -10,7 +10,7 @@ defmodule Todo.CacheTest do
   end  
 
   test "to-do operations" do
-    {:ok, cache} = Todo.Cache.start()
+    {:ok, cache} = Todo.Cache.start_link()
     alice = Todo.Cache.server_process(cache, "alice") 
     Todo.Server.add_entry(
       alice,

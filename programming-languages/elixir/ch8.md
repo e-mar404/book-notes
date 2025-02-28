@@ -133,10 +133,86 @@ the restart strategy (mandatory). Specifies how a supervisor should handle
 termination of its children. For instance, one_for_one states if a child
 terminates, another child should be started in its place.
 
+Why should you use a named process for a Supervised process?
 
+In order to be able to properly restart a process (its really just starting a
+new process in place of the one that crashed) you need to be able not to rely on
+the pid of the old process, since after the process is restarted all the old
+references to the old pid are invalid. By using a named process you do not have to keep
+track of the pid of the cache and you are able to freely restart the process.
 
+### Child specification
 
+To manage a child process a supervisor need to know the following:
 
+- the way a process child should be started
+- what should the child process terminate
+- what term should be used to uniquely identify each child
+
+When initialing Supervisor we pass in the list of child specifications and there
+are some values there by default. If we keep using the default and refactor our
+code in a way that breaks the function signature we would have to change the way
+we call the Supervisor. Instead we can pass in a tuple in the child list
+specification which will call `.child_spec(arg)` on the module passed in and
+that way we just have to implement 1 function that can handle multiple cases.
+
+GenServer by default already has a `child_spec(arg)` function so you don't
+necessarily need to write one.
+
+### Wrapping the supervisor
+
+Just like with a GenServer it is advised to wrap the Supervisor in a module.
+This module can usually be called `System` since it will be the interface that
+starts up the entire system and the required workers/modules.
+
+### Using a callback module
+
+Another way of starting a supervisor is to use the module's init function. This
+is similar to the way a GenServer is started. First you pass the `__MODULE__` to
+`Supervisor.start_link/2` and then you define an `init/1` function in that
+module which must return the list of child specifications and additional
+supervisor options such as it s strategies (use `Supervisor.init/2`).
+
+This is done in case you need more control since at first glance for simple
+scenarios it achieves the same behavior. For instance if you need to do some
+extra initialization before starting the system you can do it in `inti/1` or
+since this is a little more flexible you can modify the list of children without
+needing to restart the entire Supervisor.
+
+### Linking all process
+
+As of now the supervisor restarts the to-do cache and you get a new set of
+processes, this includes all the other process that did not crash. This means
+that once the cache process gets restarted the old process (for server and
+database) are just unused garbage that are kept running.
+
+You can double check this by looking at the number of processes being ran then
+terminating the Todo.Cache service and starting the same Todo.Server that was
+already started. You would have an extra process running (if it is a previously
+started process then the cache should not have made a new process).
+
+Terminating a Todo cache should also terminate its state in the proper way. To 
+do this you must establish links between processes.
+
+By linking every part of the system you get to detect an error from any part of
+itself and then recover from it without leaving loaner processes behind.
+
+Links ensure that dependent process are terminated as well, which keeps the
+system consistent.
+
+### Restart frequency
+
+The supervisor will not restart a child process forever since there is s max
+amount of tries per time period. By default the mac restart frequency is three
+restarts in 5 seconds. This ofc is just the default and can be changed by
+passing `:max_restarts` and `:max_seconds` as options to the
+`Supervisor.start_link/2`.
+
+After the max restart frequency is exceeded then the supervisor will terminate
+as well as all its children.
+
+This is simply because if restarting the process does not help the crashing
+issues then there is no point in infinitely restarting a process.
 
 
 
