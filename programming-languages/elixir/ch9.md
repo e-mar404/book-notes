@@ -162,11 +162,111 @@ The last 2 strategies are useful if there's tight coupling between children
 processes. One example is when a process keeps the pid of some sibling in its
 own state.
 
+## Starting processes dynamically
 
+### Registering to-do servers
 
+In order to do this is it pretty similar to the process applied to the database.
+You need to register the process and use the function `via_tuple/1` of the
+`Todo.ProcessRegistry` module to avoid collisions.
 
+### Dynamic supervision
 
+Unlike the database the to-do servers do not need to be always persistent with
+the same amount, we want a dynamic number of to-do servers running that get
+created when calling `Todo.Cache.server_process/1`. 
 
+Since you don't know the number of children you can't start a supervisor process
+with any number of children upfront since you won't know the number. For this
+Elixir provides `DynamicSupervisor` module.
+
+The DynamicSupervisor is very similar to a regular supervisor but instead of
+preemptively starting supervised child processes you get to start them on demand
+with `start_child/2`.
+
+### Finding to-do servers
+
+Since the `Todo.Server` module was turned into a dynamic supervisor it is a lot
+easier to keep track of the running todo servers. In order to start one you just
+add the server module as a child spec when using
+`DynamicSupervisor.start_child/2` and then use the return values from that
+function to determine if the server has stared or not. In the case of this to-do
+app it doesn't matter to us either way since we just want the pid that it
+returns, (which it does in both scenarios).
+
+The way that the server_process is set up as of now means that it will perform
+serialized actions which means there won't be a race condition but it is
+possible to bottleneck the Supervisor that server_process is calling on every
+call to that function. There is a better way to do this with distributed
+registration but that is a topic for later.
+
+### Using the temporary restart strategy
+
+If a to-do server crashes then there is no need to automatically restart it
+since it will come back up dynamically next time that it is used.
+
+### Testing the system
+
+To test that this implementation works:
+
+1. start the whole system
+2. get one to-do server
+3. repeat the request, making sure it doesn't start another server
+4. get a different to-do server, it should start a new server
+5. crash one to-do server
+6. try to get that same to-do server, the pid should be different
+
+## Let it crash
+
+In general, complex systems should employ supervisors as their from of error
+handling. OTP provides logging facilities, so process crashes are logged and you
+can see that something went wrong. It is even possible to set up an event
+handler that can catch crashes and send email notifications or messages to other
+systems.
+
+An important consequence is that this style of programming moves away from the
+defensive style of try catch blocks. This style is very clearly known as the
+"let it crash" approach, which is worth nothing not everything should crash.
+Notably 2 errors should always be caught:
+
+1. critical processes that shouldn't crash
+2. when you expect an error that can be dealt in a meaningful way
+
+### Processes that shouldn't crash
+
+These process that shouldn't crash are considered system's error kernel
+processes. These are the process that if they crash they take out the whole
+application.
+
+Usually we want to keep these processes as simple as possible, since the less
+logic there is the less chance there is for failure.
+
+If the services need to be a little more complex then it is worth separating
+them into two modules/services/processes: one that handles the state and the
+other that handles the logic. It is also a good idea to have try catch blocks in
+the module that handles the state since this will keep it from crashing.
+
+### Handling expected errors
+
+If you can predict and you have a way to deal with it then there is no need to
+crash the process. This is similar to how you can catch the errors of reading a
+file or reading from thing that throws errors.
+
+You can pattern match the errors and responses that you have a plan for and if
+there is not a match then there will be a pattern match error for something you
+don't have planned for so it is expected to crash based on the "let it crash"
+ideology.
+
+### Preserving the state
+
+Elixir does not provide an implementation for restoring state after a process
+crashed, that is a task that you have to implement yourself (usually saved in
+another process or in a db, and then restored when you restart).
+
+This can have its own negative effect, specially if the process is crashing due
+to the state having inconsistent data or a bug which causes a transformation to
+change. You should be careful when persisting state and should try to avoid so
+if possible.
 
 
 
