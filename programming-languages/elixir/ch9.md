@@ -267,38 +267,3 @@ This can have its own negative effect, specially if the process is crashing due
 to the state having inconsistent data or a bug which causes a transformation to
 change. You should be careful when persisting state and should try to avoid so
 if possible.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
